@@ -1,0 +1,256 @@
+/* ========= Base ========= */
+html, body {
+  background: #0B0F17 !important;
+  color: #E5E7EB;
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(54, 191, 250, 0.08), transparent 60%),
+    radial-gradient(1000px 500px at 90% 10%, rgba(122, 90, 248, 0.06), transparent 60%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ========= Typography ========= */
+h1, h2, h3 { letter-spacing: -0.02em; color: #F9FAFB; }
+.text-muted { color: #9AA4B2 !important; }
+
+/* ========= Cards ========= */
+.card {
+  background: rgba(17, 24, 39, 0.7) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 14px !important;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 30px rgba(0, 0, 0, 0.18);
+}
+.card-body { padding: 1.25rem 1.25rem !important; }
+
+/* ========= KPI cards ========= */
+.kpi-card { position: relative; overflow: hidden; }
+.kpi-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--accent, #36BFFA);
+  opacity: 0.9;
+}
+.kpi-value {
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0.25rem 0 0;
+}
+.kpi-label {
+  font-size: 0.75rem;
+  color: #9AA4B2;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 500;
+}
+
+/* ========= Date pills (above slider) ========= */
+.date-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(54, 191, 250, 0.12);
+  border: 1px solid rgba(54, 191, 250, 0.35);
+  color: #E0F2FE;
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.date-pill-arrow {
+  color: #9AA4B2;
+  margin: 0 10px;
+  font-size: 1rem;
+}
+
+/* ========= Slider ========= */
+.rc-slider {
+  padding: 10px 0 30px;
+}
+.rc-slider-rail {
+  background: rgba(255,255,255,0.08) !important;
+  height: 6px !important;
+}
+.rc-slider-track {
+  background: linear-gradient(90deg, #36BFFA, #7A5AF8) !important;
+  height: 6px !important;
+  border-radius: 3px !important;
+}
+.rc-slider-handle {
+  background: #F9FAFB !important;
+  border: 2px solid #36BFFA !important;
+  width: 18px !important;
+  height: 18px !important;
+  margin-top: -6px !important;
+  box-shadow: 0 2px 8px rgba(54, 191, 250, 0.5) !important;
+  opacity: 1 !important;
+}
+.rc-slider-handle:hover, .rc-slider-handle:active, .rc-slider-handle:focus {
+  border-color: #7A5AF8 !important;
+  box-shadow: 0 2px 12px rgba(122, 90, 248, 0.7) !important;
+}
+.rc-slider-mark-text {
+  color: #6B7280 !important;
+  font-size: 0.72rem !important;
+  font-weight: 500;
+}
+.rc-slider-mark-text-active {
+  color: #E5E7EB !important;
+}
+/* Slider tooltip — dates show via JS transform (assets/functions.js) */
+.rc-slider-tooltip {
+  z-index: 1000;
+}
+.rc-slider-tooltip-inner {
+  background: #1F2937 !important;
+  border: 1px solid rgba(54, 191, 250, 0.3) !important;
+  border-radius: 6px !important;
+  color: #E5E7EB !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  padding: 6px 10px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important;
+  min-width: 110px !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+}
+.rc-slider-tooltip-arrow {
+  border-bottom-color: #1F2937 !important;
+}
+
+/* ========= Radio button group (aggregation) ========= */
+.btn-check:checked + .btn-outline-primary,
+.btn-outline-primary.active {
+  background: linear-gradient(135deg, #36BFFA, #7A5AF8) !important;
+  border-color: transparent !important;
+  color: #fff !important;
+  box-shadow: 0 2px 8px rgba(54, 191, 250, 0.3);
+}
+.btn-outline-primary {
+  color: #9AA4B2 !important;
+  border-color: rgba(255,255,255,0.1) !important;
+  background: rgba(255,255,255,0.02) !important;
+  transition: all 0.15s;
+}
+.btn-outline-primary:hover {
+  background: rgba(54, 191, 250, 0.1) !important;
+  color: #E5E7EB !important;
+  border-color: rgba(54, 191, 250, 0.3) !important;
+}
+
+/* ========= Form labels ========= */
+.form-label {
+  color: #9AA4B2 !important;
+  font-size: 0.72rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.5rem !important;
+  font-weight: 500;
+}
+
+/* ========= Dropdown (dcc.Dropdown) — dark mode ========= */
+.Select, .Select div, .Select-control, .Select-menu-outer, .Select-menu,
+.VirtualizedSelectFocusedOption, .VirtualizedSelectOption,
+.Select-option {
+  background-color: #111827 !important;
+  color: #E5E7EB !important;
+  border-color: rgba(255,255,255,0.1) !important;
+}
+.Select-control {
+  border-radius: 8px !important;
+  min-height: 38px !important;
+}
+.Select--multi .Select-control {
+  padding-left: 6px !important;
+}
+.Select-placeholder, .Select-input, .Select-value-label, .Select-value {
+  color: #E5E7EB !important;
+}
+.Select-placeholder {
+  color: #6B7280 !important;
+}
+.Select-menu-outer {
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5) !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+  margin-top: 4px !important;
+}
+.VirtualizedSelectFocusedOption,
+.Select-option.is-focused {
+  background: rgba(54, 191, 250, 0.15) !important;
+  color: #E0F2FE !important;
+}
+.Select-option.is-selected {
+  background: rgba(54, 191, 250, 0.08) !important;
+  color: #E0F2FE !important;
+}
+.Select--multi .Select-value {
+  background: linear-gradient(135deg, rgba(54, 191, 250, 0.2), rgba(122, 90, 248, 0.2)) !important;
+  color: #F0F9FF !important;
+  border: 1px solid rgba(54, 191, 250, 0.4) !important;
+  border-radius: 6px !important;
+  margin-top: 4px !important;
+  font-size: 0.78rem !important;
+}
+.Select--multi .Select-value-icon {
+  border-right: 1px solid rgba(255,255,255,0.15) !important;
+  padding: 1px 6px !important;
+  color: #F0F9FF !important;
+}
+.Select--multi .Select-value-icon:hover {
+  background: rgba(249, 112, 102, 0.3) !important;
+  color: #fff !important;
+}
+.Select-arrow, .Select-clear {
+  color: #9AA4B2 !important;
+}
+.Select-arrow-zone:hover .Select-arrow {
+  color: #36BFFA !important;
+}
+.Select.is-focused:not(.is-open) > .Select-control {
+  border-color: #36BFFA !important;
+  box-shadow: 0 0 0 3px rgba(54, 191, 250, 0.15) !important;
+}
+
+/* Dropdown menu must float above the KPI/chart cards below */
+.Select-menu-outer {
+  z-index: 2000 !important;
+  position: absolute !important;
+}
+.dash-dropdown, .Select {
+  position: relative;
+  z-index: 100;
+}
+
+/* Lift the whole controls card above siblings so its open dropdown doesn't get clipped */
+.controls-card {
+  position: relative;
+  z-index: 50;
+}
+
+/* ========= Plotly modebar ========= */
+.modebar { display: none !important; }
+
+/* ========= Download button loading wrap — keep button visible under spinner ========= */
+.download-loading-wrap {
+  position: relative;
+}
+.download-loading-wrap .dash-spinner {
+  position: absolute !important;
+  right: 8px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 16px !important;
+  height: 16px !important;
+}

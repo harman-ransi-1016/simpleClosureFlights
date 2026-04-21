@@ -1,0 +1,15 @@
+# Raw BTS zips and row-level parquets — recreated by ingestion notebook
+data/raw/
+data/clean/
+data/csv/
+data/flights_agg.parquet
+
+# Python / notebook cruft
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.DS_Store
+
+# AWS creds (if ever dropped in)
+.aws/
+credentials.csv
