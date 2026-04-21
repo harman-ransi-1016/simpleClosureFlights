@@ -1,8 +1,10 @@
 """
-SimpleClosure Take-Home — Flight Delays Dashboard.
+SimpleClosure take-home — flight delays dashboard.
 
-Loads the pre-aggregated parquet from S3 on startup and serves four charts
-+ KPI row backed by date-range / aggregation / carrier / delay-basis / grain filters.
+- Loads the pre-aggregated parquet from S3 on startup
+- Serves 4 charts + a KPI row
+- Controls: date range, aggregation (w/m/q/y), carriers, delay basis
+  (Arrival / Departure / Either), and an Airport ↔ City grain toggle
 """
 
 import os
@@ -259,18 +261,33 @@ app.layout = dbc.Container(
             ),
         ]),
         controls,
+
+        # Section header: aggregate metrics across the current selection
+        html.Div("Aggregate metrics", className="text-muted small mb-2",
+                 style={"textTransform": "uppercase", "letterSpacing": "0.08em"}),
         dcc.Loading(
             dbc.Row(id="kpi-row", className="mb-4 g-3"),
             type="default",
             color="#36BFFA",
         ),
+
+        # Section header: minute-level breakdowns (cause + carrier)
+        html.Div([
+            html.Div("Minute-level breakdown",
+                     style={"textTransform": "uppercase", "letterSpacing": "0.08em"}),
+            html.Div("Arrival-only — BTS doesn't publish per-cause or per-minute "
+                     "attribution for departure delays",
+                     style={"textTransform": "none", "letterSpacing": "normal",
+                            "fontSize": "0.75rem", "opacity": 0.7, "marginTop": "2px"}),
+        ], className="text-muted small mt-4 mb-2"),
         dbc.Row([
             dbc.Col(graph_card("chart-cause"),   md=7),
             dbc.Col(graph_card("chart-carrier"), md=5),
         ], className="g-3 mb-3"),
-        # Grain toggle only affects the two charts below it
+
+        # Section header: geography (respects Grain toggle)
         html.Div([
-            html.Div("Origin / Destination breakdown", className="text-muted small",
+            html.Div("Location breakdown", className="text-muted small",
                      style={"textTransform": "uppercase", "letterSpacing": "0.08em"}),
             dbc.RadioItems(
                 id="grain",
@@ -355,12 +372,7 @@ def update_charts(idx_range, freq, carriers, grain, delay_basis):
         category_orders={"Cause": list(CAUSE_COLS.keys())},
     )
     fig_cause.update_traces(line={"width": 0}, hovertemplate="%{fullData.name}: %{y:,.0f} min<extra></extra>")
-    fig_cause = style_fig(
-        fig_cause,
-        "Delay minutes by cause  "
-        "<span style='color:#6B7280; font-size:10px; font-weight:normal'>"
-        "· arrival-attributed (BTS only attributes causes to arrival delays)</span>",
-    )
+    fig_cause = style_fig(fig_cause, "Delay minutes by cause")
 
     tickformat_by_freq = {"week": "%b %d, '%y", "month": "%b '%y", "quarter": "Q%q %Y", "year": "%Y"}
     fig_cause.update_layout(hovermode="x unified", yaxis_title=None, xaxis_title=None)
@@ -414,12 +426,7 @@ def update_charts(idx_range, freq, carriers, grain, delay_basis):
             "Avg delay: %{customdata[2]:.0f} min<extra></extra>"
         ),
     ))
-    fig_carrier = style_fig(
-        fig_carrier,
-        "Carriers — frequency × severity of delays  "
-        "<span style='color:#6B7280; font-size:10px; font-weight:normal'>"
-        "· severity = avg arrival delay minutes</span>",
-    )
+    fig_carrier = style_fig(fig_carrier, "Carriers — frequency × severity of delays")
     fig_carrier.update_xaxes(title="Delay rate", tickformat=".0%", nticks=6,
                              showline=True, linecolor="rgba(255,255,255,0.1)")
     fig_carrier.update_yaxes(title="Avg minutes late", ticksuffix=" min", nticks=6,

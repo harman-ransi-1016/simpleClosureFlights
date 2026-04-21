@@ -1,1 +1,3 @@
+# Render / Heroku-style entrypoint. One worker is enough since the app
+# is a single shared dataframe in memory.
 web: gunicorn app:server --bind 0.0.0.0:$PORT --workers 1 --timeout 120

@@ -1,3 +1,5 @@
+/* Dashboard theme overrides on top of dbc.themes.DARKLY */
+
 /* ========= Base ========= */
 html, body {
   background: #0B0F17 !important;

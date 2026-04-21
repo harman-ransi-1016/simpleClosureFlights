@@ -1,4 +1,5 @@
-// Slider tooltip transform — converts week index → date string
+// Slider tooltip transform — the RangeSlider value is a week index (0..370),
+// this converts it to a human date string for the tooltip.
 window.dccFunctions = window.dccFunctions || {};
 
 window.dccFunctions.weekToDate = function(value) {
