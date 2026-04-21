@@ -26,7 +26,26 @@ AGG_URL = os.environ.get(
 print(f"Loading agg parquet from {AGG_URL} ...")
 df = pd.read_parquet(AGG_URL)
 df["week_start"] = pd.to_datetime(df["week_start"])
-print(f"Loaded {len(df):,} rows, {df['week_start'].min().date()} → {df['week_start'].max().date()}")
+
+# Shrink memory footprint so the app fits in 512 MB RAM on Render free tier:
+# - Repeated strings → category (10-100× smaller than object dtype)
+# - Float sums → float32 (half the memory of float64)
+# - Counts → int32
+for col in ["carrier", "Origin", "Dest", "OriginCityName", "OriginState",
+            "DestCityName", "DestState"]:
+    df[col] = df[col].astype("category")
+for col in ["n_flights"]:
+    df[col] = df[col].astype("int32")
+for col in ["n_delayed_arr", "n_delayed_dep", "n_delayed_either",
+            "n_cancelled", "n_diverted", "sum_arr_delay_min",
+            "sum_carrier_delay", "sum_weather_delay", "sum_nas_delay",
+            "sum_security_delay", "sum_late_aircraft_delay"]:
+    df[col] = df[col].astype("float32")
+
+mem_mb = df.memory_usage(deep=True).sum() / 1e6
+print(f"Loaded {len(df):,} rows, "
+      f"{df['week_start'].min().date()} → {df['week_start'].max().date()}, "
+      f"{mem_mb:.0f} MB in memory")
 
 CAUSE_COLS = {
     "Carrier":        "sum_carrier_delay",
@@ -391,7 +410,7 @@ def update_charts(idx_range, freq, carriers, grain, delay_basis):
     # - Y: avg arrival delay minutes (arrival-only, BTS limitation)
     # - Size: flight volume
     carrier_df = (
-        sub.groupby("carrier", as_index=False)
+        sub.groupby("carrier", as_index=False, observed=True)
            .agg(n_flights=("n_flights", "sum"),
                 n_delayed=(delay_col, "sum"),
                 n_delayed_arr=("n_delayed_arr", "sum"),
@@ -482,7 +501,7 @@ def paired_airport_chart(sub, code_col, city_col, title, delay_col):
     # - Top 10 lowest + top 10 highest delay rate, rendered as side-by-side subplots
     group_cols = [code_col] if city_col is None else [code_col, city_col]
     agg = (
-        sub.groupby(group_cols, as_index=False)
+        sub.groupby(group_cols, as_index=False, observed=True)
            .agg(n_flights=("n_flights", "sum"), n_delayed=(delay_col, "sum"))
     )
     agg = agg[agg["n_flights"] >= 500]
