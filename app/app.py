@@ -9,7 +9,9 @@ SimpleClosure take-home — flight delays dashboard.
 
 import ctypes
 import gc
+import io
 import os
+from urllib.request import urlopen
 
 import pandas as pd
 import pyarrow.parquet as pq
@@ -38,8 +40,18 @@ AGG_URL = os.environ.get(
 # Read via pyarrow and dict-encode strings BEFORE converting to pandas.
 # This avoids pandas briefly materializing string columns as object dtype
 # (which balloons RAM ~5×, enough to OOM a 512 MB container).
+#
+# pyarrow.read_table doesn't accept HTTPS URLs directly, so we pull the
+# bytes with urlopen and feed a BytesIO buffer.
 print(f"Loading agg parquet from {AGG_URL} ...")
-table = pq.read_table(AGG_URL)
+if AGG_URL.startswith(("http://", "https://")):
+    with urlopen(AGG_URL) as resp:
+        buf = io.BytesIO(resp.read())
+    table = pq.read_table(buf)
+    del buf
+else:
+    table = pq.read_table(AGG_URL)
+
 for col in ["carrier", "Origin", "Dest", "OriginCityName",
             "OriginState", "DestCityName", "DestState"]:
     idx = table.schema.get_field_index(col)
