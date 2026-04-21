@@ -7,14 +7,26 @@ SimpleClosure take-home — flight delays dashboard.
   (Arrival / Departure / Either), and an Airport ↔ City grain toggle
 """
 
+import ctypes
+import gc
 import os
 
 import pandas as pd
+import pyarrow.parquet as pq
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import dash_bootstrap_components as dbc
 from dash import Dash, dcc, html, Input, Output, State
+
+
+def _trim_malloc():
+    # Force the Linux allocator to return freed memory to the OS.
+    # No-ops on macOS / Windows.
+    try:
+        ctypes.CDLL("libc.so.6").malloc_trim(0)
+    except (OSError, AttributeError):
+        pass
 
 # ── Data ──
 
@@ -23,24 +35,30 @@ AGG_URL = os.environ.get(
     "https://s3-flights-harman-simpleclosure.s3.amazonaws.com/flights_agg.parquet",
 )
 
+# Read via pyarrow and dict-encode strings BEFORE converting to pandas.
+# This avoids pandas briefly materializing string columns as object dtype
+# (which balloons RAM ~5×, enough to OOM a 512 MB container).
 print(f"Loading agg parquet from {AGG_URL} ...")
-df = pd.read_parquet(AGG_URL)
-df["week_start"] = pd.to_datetime(df["week_start"])
+table = pq.read_table(AGG_URL)
+for col in ["carrier", "Origin", "Dest", "OriginCityName",
+            "OriginState", "DestCityName", "DestState"]:
+    idx = table.schema.get_field_index(col)
+    table = table.set_column(idx, col, table.column(col).dictionary_encode())
+df = table.to_pandas()
+del table
+gc.collect()
+_trim_malloc()
 
-# Shrink memory footprint so the app fits in 512 MB RAM on Render free tier:
-# - Repeated strings → category (10-100× smaller than object dtype)
-# - Float sums → float32 (half the memory of float64)
-# - Counts → int32
-for col in ["carrier", "Origin", "Dest", "OriginCityName", "OriginState",
-            "DestCityName", "DestState"]:
-    df[col] = df[col].astype("category")
-for col in ["n_flights"]:
-    df[col] = df[col].astype("int32")
+df["week_start"] = pd.to_datetime(df["week_start"])
+df["n_flights"] = df["n_flights"].astype("int32")
 for col in ["n_delayed_arr", "n_delayed_dep", "n_delayed_either",
             "n_cancelled", "n_diverted", "sum_arr_delay_min",
             "sum_carrier_delay", "sum_weather_delay", "sum_nas_delay",
             "sum_security_delay", "sum_late_aircraft_delay"]:
     df[col] = df[col].astype("float32")
+
+gc.collect()
+_trim_malloc()
 
 mem_mb = df.memory_usage(deep=True).sum() / 1e6
 print(f"Loaded {len(df):,} rows, "
